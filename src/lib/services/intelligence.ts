@@ -110,7 +110,7 @@ export class IntelligenceService {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     // 1 ── Calculate Ground Truth Stats to anchor the AI
     const totalReviews = reviews.length;
@@ -187,7 +187,7 @@ export class IntelligenceService {
       const response = await result.response;
       const text = response.text();
       const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error("Failed to parse AI response");
+      if (!jsonMatch) throw new Error("Failed to parse AI response — model returned non-JSON output.");
       
       const aiData = JSON.parse(jsonMatch[0]);
       
@@ -200,15 +200,30 @@ export class IntelligenceService {
         sampleReviews: reviews.slice(0, 3)
       };
 
-      // 2 ── Save to Cache if URL provided
+      // 2 ── Save to Cache if URL provided (non-blocking)
       if (url) {
-        await this.saveToCache(url, reviews, finalReport);
+        this.saveToCache(url, reviews, finalReport).catch(cacheErr => {
+          console.warn("Cache save failed (non-critical):", cacheErr);
+        });
       }
 
       return finalReport;
-    } catch (e) {
-      console.error("Gemini Analysis Failed:", e);
-      throw new Error("Intelligence Analysis Failed. Please ensure your API keys are valid.");
+    } catch (e: any) {
+      // Surface the real error for debugging
+      const realMsg = e?.message || String(e);
+      console.error("Gemini Analysis Failed (real error):", realMsg);
+
+      if (realMsg.includes("API_KEY_INVALID") || realMsg.includes("invalid api key")) {
+        throw new Error("Gemini API key is invalid. Please check your GEMINI_API_KEY environment variable.");
+      }
+      if (realMsg.includes("quota") || realMsg.includes("429")) {
+        throw new Error("Gemini API quota exceeded. Please wait a moment and try again.");
+      }
+      if (realMsg.includes("parse") || realMsg.includes("JSON")) {
+        throw new Error("AI returned an unexpected format. Retrying may help.");
+      }
+
+      throw new Error(`Analysis failed: ${realMsg}`);
     }
   }
 
