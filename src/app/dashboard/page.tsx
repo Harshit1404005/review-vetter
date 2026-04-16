@@ -119,10 +119,7 @@ function DashboardContent() {
           const trendVal = await IntelligenceService.getGlobalScoreTrend(productUrl, data.score);
           setTrend(trendVal);
         }
-          setIntel(data);
-          const trendVal = await IntelligenceService.getGlobalScoreTrend(productUrl, data.score);
-          setTrend(trendVal);
-        }
+
       } catch (e) {
         console.error("Dashboard Fetch Error:", e);
       } finally {
