@@ -10,10 +10,14 @@ import {
   AlertTriangle, 
   Zap, 
   MessageSquare, 
-  ThumbsUp, 
+  ThumbsUp,
+  ThumbsDown,
   Check,
   Search,
-  ArrowLeft
+  ArrowLeft,
+  ExternalLink,
+  Target,
+  Lightbulb
 } from "lucide-react";
 import CsvUploader from "@/components/CsvUploader";
 import { motion, AnimatePresence } from "framer-motion";
