@@ -24,7 +24,6 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase/client";
-import ComparisonView from "@/components/ComparisonView";
 
 /* ─── Clipboard Hook ─── */
 function useCopy() {
