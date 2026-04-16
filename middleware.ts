@@ -8,6 +8,12 @@ export async function middleware(request: NextRequest) {
 
   // 1. Only enforce on Analysis API
   if (pathname.startsWith('/api/analyze')) {
+
+    // ── DEV BYPASS: Skip all quota checks in local development ──
+    if (process.env.NODE_ENV === 'development') {
+      return NextResponse.next()
+    }
+
     let response = NextResponse.next({
       request: {
         headers: request.headers,
@@ -44,6 +50,12 @@ export async function middleware(request: NextRequest) {
         { error: 'Authentication required' },
         { status: 401 }
       )
+    }
+
+    // ── ADMIN BYPASS: Skip quota for the site owner ──
+    const adminEmail = process.env.ADMIN_EMAIL
+    if (adminEmail && user.email === adminEmail) {
+      return NextResponse.next()
     }
 
     // 2. Enforce Quota
