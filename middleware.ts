@@ -60,7 +60,7 @@ export async function middleware(request: NextRequest) {
 
     // 2. Enforce Quota
     const quota = await QuotaManager.checkAndIncrement(user.id)
-    
+
     if (!quota.allowed) {
       return NextResponse.json(
         { error: quota.error || 'Daily usage limit reached' },
@@ -77,5 +77,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/api/analyze', '/api/analyze-raw'],
+  matcher: '/api/:path*',
 }
