@@ -1,16 +1,17 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { 
-  ShieldCheck, 
-  Trash2, 
+import {
+  ShieldCheck,
+  Trash2,
   ChevronRight,
   ChevronUp,
-  Download, 
-  Share2, 
-  AlertTriangle, 
-  Zap, 
-  MessageSquare, 
+  ChevronDown,
+  Download,
+  Share2,
+  AlertTriangle,
+  Zap,
+  MessageSquare,
   ThumbsUp,
   ThumbsDown,
   Check,
@@ -18,6 +19,7 @@ import {
   ArrowLeft,
   ExternalLink,
   Target,
+  Copy,
   Lightbulb,
   Lock,
   Star
@@ -98,21 +100,21 @@ function DashboardContent() {
       try {
         const res = await fetch("/api/analyze", {
           method: "POST",
-          body: JSON.stringify({ 
-            url: productUrl, 
-            competitorUrl, 
+          body: JSON.stringify({
+            url: productUrl,
+            competitorUrl,
             isComparison: !!competitorUrl,
-            isDemo: isDemo 
+            isDemo: isDemo
           }),
           headers: { "Content-Type": "application/json" },
         });
-        
+
         const data = await res.json();
 
         if (!res.ok) {
-           setErrorMsg(data.error || "Analysis failed. Please try again.");
-           setLoading(false);
-           return;
+          setErrorMsg(data.error || "Analysis failed. Please try again.");
+          setLoading(false);
+          return;
         }
 
         if (data.type === "COMPARISON") {
@@ -168,7 +170,7 @@ function DashboardContent() {
   const handleCsvAnalysis = async (reviews: any[], productName: string) => {
     setLoading(true);
     setErrorMsg("");
-    
+
     try {
       const response = await fetch("/api/analyze-raw", {
         method: "POST",
@@ -209,11 +211,11 @@ function DashboardContent() {
           <p className="text-slate-500 font-medium max-w-sm mb-10 leading-relaxed">
             {errorMsg}
           </p>
-          
+
           {isBlocked ? (
             <div className="w-full max-w-md">
               <CsvUploader onDataReady={handleCsvAnalysis} className="mb-8" />
-              <Link 
+              <Link
                 href="/"
                 className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-colors"
               >
@@ -222,13 +224,13 @@ function DashboardContent() {
             </div>
           ) : (
             <div className="flex gap-4">
-              <Link 
+              <Link
                 href="/"
                 className="px-8 py-4 bg-white text-slate-900 border border-slate-200 rounded-2xl font-black uppercase text-xs tracking-widest hover:border-indigo-600 transition-all"
               >
                 Try Different Product
               </Link>
-              <Link 
+              <Link
                 href="/pricing"
                 className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-900 transition-all shadow-lg shadow-indigo-200"
               >
@@ -254,7 +256,7 @@ function DashboardContent() {
           <p className="text-slate-500 font-medium max-w-sm mb-10 leading-relaxed">
             Enter an Amazon, Shopify, or Walmart URL on the home page to generate deep market intelligence.
           </p>
-          <Link 
+          <Link
             href="/"
             className="px-8 py-4 bg-white text-slate-900 border border-slate-200 rounded-2xl font-black uppercase tracking-widest hover:border-indigo-600 hover:text-indigo-600 transition-all shadow-sm"
           >
@@ -349,25 +351,25 @@ function DashboardContent() {
 
               {/* Score Legend Tooltip */}
               <div className="absolute top-full mt-2 right-0 w-48 bg-slate-900 text-white rounded-xl shadow-2xl p-3 opacity-0 translate-y-2 pointer-events-none group-hover/score:opacity-100 group-hover/score:translate-y-0 transition-all z-50">
-                 <div className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Vetter Scale</div>
-                 <div className="space-y-1.5">
-                    <div className="flex items-center justify-between text-[10px]">
-                       <span className="font-bold text-emerald-400">81-100</span>
-                       <span className="text-slate-300">Market Leader</span>
-                    </div>
-                    <div className="flex items-center justify-between text-[10px]">
-                       <span className="font-bold text-emerald-500">66-80</span>
-                       <span className="text-slate-300">Strong Edge</span>
-                    </div>
-                    <div className="flex items-center justify-between text-[10px]">
-                       <span className="font-bold text-amber-400">41-65</span>
-                       <span className="text-slate-300">Competitive</span>
-                    </div>
-                    <div className="flex items-center justify-between text-[10px]">
-                       <span className="font-bold text-red-400">0-40</span>
-                       <span className="text-slate-300">Critical Risk</span>
-                    </div>
-                 </div>
+                <div className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Vetter Scale</div>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="font-bold text-emerald-400">81-100</span>
+                    <span className="text-slate-300">Market Leader</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="font-bold text-emerald-500">66-80</span>
+                    <span className="text-slate-300">Strong Edge</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="font-bold text-amber-400">41-65</span>
+                    <span className="text-slate-300">Competitive</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="font-bold text-red-400">0-40</span>
+                    <span className="text-slate-300">Critical Risk</span>
+                  </div>
+                </div>
               </div>
 
               {trend !== null && (
@@ -384,30 +386,30 @@ function DashboardContent() {
             <div className="flex items-center gap-2">
               <AnimatePresence>
                 {isComparing ? (
-                  <motion.div 
+                  <motion.div
                     initial={{ width: 0, opacity: 0 }}
                     animate={{ width: "auto", opacity: 1 }}
                     exit={{ width: 0, opacity: 0 }}
                     className="flex items-center gap-2 bg-white border border-indigo-200 rounded-xl px-3 py-1.5 shadow-sm"
-                   >
-                     <input 
-                       type="text" 
-                       placeholder="Competitor URL..." 
-                       className="bg-transparent border-none focus:ring-0 text-[11px] font-medium w-32 md:w-48 outline-none"
-                       value={compInput}
-                       onChange={(e) => setCompInput(e.target.value)}
-                       onKeyDown={(e) => {
-                         if (e.key === "Enter") {
-                           const params = new URLSearchParams(window.location.search);
-                           params.set("compare", compInput);
-                           window.location.href = `/dashboard?${params.toString()}`;
-                         }
-                       }}
-                      />
-                      <button onClick={() => setIsComparing(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
-                        <Check className="w-3.5 h-3.5" />
-                      </button>
-                   </motion.div>
+                  >
+                    <input
+                      type="text"
+                      placeholder="Competitor URL..."
+                      className="bg-transparent border-none focus:ring-0 text-[11px] font-medium w-32 md:w-48 outline-none"
+                      value={compInput}
+                      onChange={(e) => setCompInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          const params = new URLSearchParams(window.location.search);
+                          params.set("compare", compInput);
+                          window.location.href = `/dashboard?${params.toString()}`;
+                        }
+                      }}
+                    />
+                    <button onClick={() => setIsComparing(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                      <Check className="w-3.5 h-3.5" />
+                    </button>
+                  </motion.div>
                 ) : (
                   <button
                     onClick={() => setIsComparing(true)}
@@ -612,44 +614,44 @@ function DashboardContent() {
 
         {/* ── PREMIUM GATE WRAPPER (CONDITIONAL) ── */}
         <div className="relative space-y-5">
-           {!user && (
-             <div className="absolute -inset-x-4 -inset-y-4 bg-slate-50/40 backdrop-blur-[6px] z-40 rounded-[2rem] flex items-center justify-center p-8">
-               <motion.div 
-                 initial={{ opacity: 0, y: 20 }}
-                 whileInView={{ opacity: 1, y: 0 }}
-                 className="max-w-md bg-white border border-slate-200 rounded-3xl p-8 shadow-2xl text-center space-y-6"
-               >
-                 <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto shadow-xl shadow-indigo-600/20">
-                   <Lock className="w-8 h-8 text-white" />
-                 </div>
-                 <div>
-                    <h3 className="text-xl font-black text-slate-900 mb-2">Unlock the Full Report</h3>
-                    <p className="text-sm text-slate-500 font-medium leading-relaxed">
-                      You're seeing the high-level SWOT. Join 500+ growth brands to unlock:
-                    </p>
-                 </div>
-                 <div className="grid grid-cols-2 gap-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    <div className="bg-slate-50 p-2 rounded-lg border border-slate-100 italic">✓ Revenue Leakage</div>
-                    <div className="bg-slate-50 p-2 rounded-lg border border-slate-100 italic">✓ Ad Creative Studio</div>
-                    <div className="bg-slate-50 p-2 rounded-lg border border-slate-100 italic">✓ Smart Replies</div>
-                    <div className="bg-slate-50 p-2 rounded-lg border border-slate-100 italic">✓ Strategy Roadmap</div>
-                 </div>
-                 <div className="pt-2">
-                    <Link 
-                      href="/signup"
-                      className="inline-flex items-center gap-2 bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-900 transition-all shadow-xl shadow-indigo-600/30 w-full justify-center"
-                    >
-                      <Zap className="w-4 h-4 fill-current" /> Get Full Access — Free
-                    </Link>
-                    <Link href="/login" className="block mt-4 text-xs font-bold text-slate-400 hover:text-indigo-600 transition-colors">
-                      Already have an account? Sign in
-                    </Link>
-                 </div>
-               </motion.div>
-             </div>
-           )}
+          {!user && (
+            <div className="absolute -inset-x-4 -inset-y-4 bg-slate-50/40 backdrop-blur-[6px] z-40 rounded-[2rem] flex items-center justify-center p-8">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                className="max-w-md bg-white border border-slate-200 rounded-3xl p-8 shadow-2xl text-center space-y-6"
+              >
+                <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto shadow-xl shadow-indigo-600/20">
+                  <Lock className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900 mb-2">Unlock the Full Report</h3>
+                  <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                    You're seeing the high-level SWOT. Join 500+ growth brands to unlock:
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  <div className="bg-slate-50 p-2 rounded-lg border border-slate-100 italic">✓ Revenue Leakage</div>
+                  <div className="bg-slate-50 p-2 rounded-lg border border-slate-100 italic">✓ Ad Creative Studio</div>
+                  <div className="bg-slate-50 p-2 rounded-lg border border-slate-100 italic">✓ Smart Replies</div>
+                  <div className="bg-slate-50 p-2 rounded-lg border border-slate-100 italic">✓ Strategy Roadmap</div>
+                </div>
+                <div className="pt-2">
+                  <Link
+                    href="/signup"
+                    className="inline-flex items-center gap-2 bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-900 transition-all shadow-xl shadow-indigo-600/30 w-full justify-center"
+                  >
+                    <Zap className="w-4 h-4 fill-current" /> Get Full Access — Free
+                  </Link>
+                  <Link href="/login" className="block mt-4 text-xs font-bold text-slate-400 hover:text-indigo-600 transition-colors">
+                    Already have an account? Sign in
+                  </Link>
+                </div>
+              </motion.div>
+            </div>
+          )}
 
-           <div className={cn("space-y-5 transition-all duration-700", !user && "opacity-20 pointer-events-none select-none")}>
+          <div className={cn("space-y-5 transition-all duration-700", !user && "opacity-20 pointer-events-none select-none")}>
 
             {/* Marketing Hooks */}
             <div className="bg-slate-900 rounded-2xl p-6">
@@ -683,42 +685,42 @@ function DashboardContent() {
             </div>
             {/* Revenue Leakage (Interactive) */}
             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm relative overflow-hidden group">
-               <div className="absolute top-0 right-0 w-32 h-32 bg-red-50/50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110" />
-               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-                  <div className="flex-1">
-                     <div className="flex items-center gap-2 mb-2">
-                        <Star className="w-4 h-4 text-red-500 fill-red-500" />
-                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Revenue Leakage Analysis</h3>
-                     </div>
-                     <h4 className="text-lg font-black text-slate-900 mb-2">
-                        Potential <span className="text-red-500">${Math.floor(userRevenue * (parseFloat(intel?.revenueImpact?.recoveryEstimate || "0") / 100)).toLocaleString()}</span> Recovery
-                     </h4>
-                     <p className="text-xs text-slate-500 leading-relaxed max-w-md">
-                        Primary Leakage: <span className="font-bold text-slate-700">{intel?.revenueImpact?.leakageReason}</span>. 
-                        Solving this issue could recover an estimated <span className="text-red-600 font-bold">{intel?.revenueImpact?.recoveryEstimate}</span> of your monthly revenue.
-                     </p>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-red-50/50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110" />
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Star className="w-4 h-4 text-red-500 fill-red-500" />
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Revenue Leakage Analysis</h3>
                   </div>
+                  <h4 className="text-lg font-black text-slate-900 mb-2">
+                    Potential <span className="text-red-500">${Math.floor(userRevenue * (parseFloat(intel?.revenueImpact?.recoveryEstimate || "0") / 100)).toLocaleString()}</span> Recovery
+                  </h4>
+                  <p className="text-xs text-slate-500 leading-relaxed max-w-md">
+                    Primary Leakage: <span className="font-bold text-slate-700">{intel?.revenueImpact?.leakageReason}</span>.
+                    Solving this issue could recover an estimated <span className="text-red-600 font-bold">{intel?.revenueImpact?.recoveryEstimate}</span> of your monthly revenue.
+                  </p>
+                </div>
 
-                  <div className="min-w-[200px] bg-slate-50 p-4 rounded-xl border border-slate-100">
-                     <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Your Monthly Revenue</label>
-                     <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">$</span>
-                        <input 
-                           type="number" 
-                           value={userRevenue}
-                           onChange={(e) => setUserRevenue(Number(e.target.value))}
-                           className="w-full bg-white border border-slate-200 rounded-lg pl-7 pr-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-indigo-600 outline-hidden"
-                        />
-                     </div>
-                     <div className="mt-3 h-1 w-full bg-slate-200 rounded-full overflow-hidden">
-                        <motion.div 
-                           initial={{ width: 0 }}
-                           animate={{ width: `${intel?.revenueImpact?.recoveryEstimate}` }}
-                           className="h-full bg-red-500"
-                        />
-                     </div>
+                <div className="min-w-[200px] bg-slate-50 p-4 rounded-xl border border-slate-100">
+                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Your Monthly Revenue</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">$</span>
+                    <input
+                      type="number"
+                      value={userRevenue}
+                      onChange={(e) => setUserRevenue(Number(e.target.value))}
+                      className="w-full bg-white border border-slate-200 rounded-lg pl-7 pr-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-indigo-600 outline-hidden"
+                    />
                   </div>
-               </div>
+                  <div className="mt-3 h-1 w-full bg-slate-200 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${intel?.revenueImpact?.recoveryEstimate}` }}
+                      className="h-full bg-red-500"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Ad Creative + Crisis Response */}
@@ -866,7 +868,7 @@ function DashboardContent() {
               </div>
             </div>
 
-           </div>
+          </div>
         </div>
 
       </main>
