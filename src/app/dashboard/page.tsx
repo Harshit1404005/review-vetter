@@ -4,7 +4,8 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { 
   ShieldCheck, 
   Trash2, 
-  ChevronRight, 
+  ChevronRight,
+  ChevronUp,
   Download, 
   Share2, 
   AlertTriangle, 
@@ -17,7 +18,9 @@ import {
   ArrowLeft,
   ExternalLink,
   Target,
-  Lightbulb
+  Lightbulb,
+  Lock,
+  Star
 } from "lucide-react";
 import CsvUploader from "@/components/CsvUploader";
 import { motion, AnimatePresence } from "framer-motion";
