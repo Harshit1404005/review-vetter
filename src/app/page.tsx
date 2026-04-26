@@ -23,16 +23,26 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import { getCurrency, formatPrice, CurrencyConfig } from "@/lib/utils/currency";
+import { useEffect } from "react";
 
 export default function LandingPage() {
    const [url, setUrl] = useState("");
    const [compUrl, setCompUrl] = useState("");
    const [isCompare, setIsCompare] = useState(false);
+   const [currency, setCurrency] = useState<CurrencyConfig | null>(null);
    const router = useRouter();
+
+   useEffect(() => {
+      setCurrency(getCurrency());
+   }, []);
 
    const handleAnalyze = () => {
       if (!url.trim()) return;
-      const params = new URLSearchParams({ url });
+      const params = new URLSearchParams({ 
+        url,
+        currencySymbol: currency?.symbol || "$" 
+      });
       if (isCompare && compUrl.trim()) {
          params.append("compare", compUrl.trim());
       }
@@ -71,7 +81,7 @@ export default function LandingPage() {
                      <div className="group relative">
                         <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition"></div>
                         <Link href="/dashboard?demo=true" className="relative w-full md:w-auto px-10 py-5 bg-white text-slate-900 rounded-2xl font-black uppercase text-xs tracking-widest border border-slate-200 hover:border-indigo-500 transition-all flex items-center justify-center gap-2">
-                           <BarChart3 className="w-4 h-4" /> Start 3 Free Scrapes Today
+                           <BarChart3 className="w-4 h-4" /> Start 3 Free Insights Today
                         </Link>
                      </div>
                      <Link href="#pricing" className="w-full md:w-auto px-10 py-5 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-800 transition-all shadow-xl">
@@ -155,12 +165,12 @@ export default function LandingPage() {
                         onClick={handleAnalyze}
                         className="bg-indigo-600 hover:bg-slate-900 text-white px-10 py-5 rounded-[1.8rem] font-black uppercase text-xs tracking-widest transition-all flex items-center justify-center gap-2 shrink-0 shadow-2xl shadow-indigo-500/20"
                      >
-                        {isCompare ? "Generate SWOT" : "Scout Review"} <ArrowRight className="w-4 h-4" />
+                        {isCompare ? "Generate SWOT" : "Analyze Signals"} <ArrowRight className="w-4 h-4" />
                      </button>
                   </div>
 
                   <div className="mt-8 flex items-center justify-center gap-8 text-[11px] font-black text-slate-400 uppercase tracking-widest">
-                     <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500" /> Live Scraper</div>
+                     <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500" /> Market Intelligence</div>
                      <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500" /> SWOT Matrix</div>
                      <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500" /> Ad Creator</div>
                   </div>
@@ -177,7 +187,7 @@ export default function LandingPage() {
                         <span className="text-indigo-400 underline decoration-indigo-400/30">1 Strategic Roadmap.</span>
                      </h2>
                      <div className="space-y-8">
-                        <DemoStep num="1" title="Scout Platform" desc="Identify sentiment shifts and core flaws in 60 seconds." />
+                        <DemoStep num="1" title="Market Scout" desc="Identify sentiment shifts and core flaws in 60 seconds." />
                         <DemoStep num="2" title="Vetter Analysis" desc="AI scores your product (0-100) vs the market average." />
                         <DemoStep num="3" title="Executive Export" desc="Generate Pro PDFs with formatted roadmaps for your team." />
                      </div>
@@ -205,7 +215,7 @@ export default function LandingPage() {
                   <h2 className="text-4xl font-display font-black text-slate-900 mb-6 tracking-tight">The Price of Bad Reviews</h2>
                   <p className="text-slate-500 font-medium italic">Every 0.5★ drop below 4.5 costs you an average of 4.2% in conversion rate.</p>
                </div>
-               <RoiCalculator />
+               <RoiCalculator currency={currency} />
             </section>
 
             {/* ─── PRICING: CONVERSION FOCUSED ─── */}
@@ -221,11 +231,11 @@ export default function LandingPage() {
                      <h3 className="text-xl font-black mb-1">Starter</h3>
                      <p className="text-slate-400 text-xs mb-8 uppercase font-bold tracking-widest">Beta Launch Period</p>
                      <div className="flex items-baseline gap-1 mb-10">
-                        <span className="text-4xl font-black text-slate-900">$0</span>
+                        <span className="text-4xl font-black text-slate-900">{currency ? formatPrice(0, currency) : "$0"}</span>
                         <span className="text-sm font-black text-slate-400">/mo</span>
                      </div>
                      <ul className="space-y-4 mb-12 flex-1">
-                        <PricingFeature label="3 Detailed Scans / day" />
+                        <PricingFeature label="3 Market Signals / day" />
                         <PricingFeature label="Amazon + Trustpilot" />
                         <PricingFeature label="Vetter Roadmap (AI)" />
                         <PricingFeature label="CSV Fallback Access" />
@@ -241,11 +251,11 @@ export default function LandingPage() {
                      <h3 className="text-xl font-black mb-1">Pro Scout</h3>
                      <p className="text-indigo-300 text-xs mb-8 uppercase font-bold tracking-widest italic">Growth & Scale Tier</p>
                      <div className="flex items-baseline gap-1 mb-10">
-                        <span className="text-5xl font-black text-white">$27</span>
+                        <span className="text-5xl font-black text-white">{currency ? formatPrice(27, currency) : "$27"}</span>
                         <span className="text-sm font-black text-slate-400">/mo</span>
                      </div>
                      <ul className="space-y-4 mb-12 flex-1">
-                        <PricingFeature label="50 Intelligence Scans / day" spotlight />
+                        <PricingFeature label="50 High-Volume Reports / day" spotlight />
                         <PricingFeature label="Walmart + Shopify Support" spotlight />
                         <PricingFeature label="Pro PDF Audits (Unbranded)" spotlight />
                         <PricingFeature label="Ad Hook Studio Access" spotlight />
@@ -261,14 +271,14 @@ export default function LandingPage() {
                      <h3 className="text-xl font-black mb-1">Business</h3>
                      <p className="text-slate-400 text-xs mb-8 uppercase font-bold tracking-widest">Agencies & Large Volume</p>
                      <div className="flex items-baseline gap-1 mb-10">
-                        <span className="text-4xl font-black text-slate-900">$89</span>
+                        <span className="text-4xl font-black text-slate-900">{currency ? formatPrice(89, currency) : "$89"}</span>
                         <span className="text-sm font-black text-slate-400">/mo</span>
                      </div>
                      <ul className="space-y-4 mb-12 flex-1">
-                        <PricingFeature label="Unlimited Scans" />
+                        <PricingFeature label="Unlimited Portfolio Analysis" />
                         <PricingFeature label="Team Access (5 Seats)" />
                         <PricingFeature label="External Report Sharing" />
-                        <PricingFeature label="API Scraper Access" />
+                        <PricingFeature label="API Intelligence Integration" />
                         <PricingFeature label="Priority AI Queue" />
                      </ul>
                      <Link href="/signup" className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-800 transition-all text-center">
@@ -348,8 +358,8 @@ function PricingFeature({ label, spotlight }: any) {
    );
 }
 
-function RoiCalculator() {
-   const [rev, setRev] = useState(25000);
+function RoiCalculator({ currency }: { currency: CurrencyConfig | null }) {
+   const [rev, setRev] = useState(200000);
    const [rate, setRate] = useState(3.8);
 
    const lost = Math.max(0, rev * (4.5 - rate) * 0.084);
@@ -360,7 +370,7 @@ function RoiCalculator() {
          <div className="relative z-10">
             <div className="flex items-center gap-3 mb-10">
                <BarChart3 className="text-indigo-400 w-6 h-6" />
-               <h3 className="text-xs font-black text-indigo-400 uppercase tracking-[0.3em]">Revenue Leakage Audit</h3>
+               <h3 className="text-xs font-black text-indigo-400 uppercase tracking-[0.3em]">Find your lost money</h3>
             </div>
 
             <div className="space-y-10">
@@ -368,7 +378,7 @@ function RoiCalculator() {
                   <div>
                      <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 text-left">Monthly Revenue</label>
                      <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">$</span>
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">{currency?.symbol || "$"}</span>
                         <input
                            type="number"
                            value={rev}
@@ -395,8 +405,10 @@ function RoiCalculator() {
                <div className="pt-10 border-t border-slate-800">
                   <div className="flex justify-between items-end">
                      <div>
-                        <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 leading-none">Detected Leakage</div>
-                        <div className="text-6xl font-black text-white tabular-nums tracking-tighter">${lost.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+                        <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 leading-none">Money you're losing</div>
+                        <div className="text-6xl font-black text-white tabular-nums tracking-tighter">
+                           {currency?.symbol || "$"}{lost.toLocaleString(currency?.locale || 'en-US', { maximumFractionDigits: 0 })}
+                        </div>
                      </div>
                      <div className="text-right pb-2">
                         <div className="text-[11px] text-red-400 font-black uppercase tracking-widest animate-pulse">Critical Severity</div>

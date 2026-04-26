@@ -5,7 +5,7 @@ export const runtime = "edge";
 
 export async function POST(req: Request) {
   try {
-    const { url, competitorUrl, isComparison, isDemo } = await req.json();
+    const { url, competitorUrl, isComparison, isDemo, currencySymbol } = await req.json();
     const token = process.env.APIFY_TOKEN;
 
     // 0 ── Handle Demo Mode
@@ -52,13 +52,13 @@ export async function POST(req: Request) {
           }
 
           if (reviews.length > 0) {
-            return await IntelligenceService.analyzeReviews(pName, reviews, targetUrl);
+            return await IntelligenceService.analyzeReviews(pName, reviews, targetUrl, currencySymbol);
           }
         } catch (e: any) {
           console.error(`Analysis failed for ${targetUrl}:`, e);
           const msg = e.message || "";
           if (msg.includes("blocked") || msg.includes("forbidden") || msg.includes("timeout")) {
-             throw new Error("Amazon/Site blocked our scan. Try another link or a direct CSV upload.");
+             throw new Error("Modern security protocols paused our live scout. Use a different link or upload a CSV below for instant analysis.");
           }
           throw e;
         }

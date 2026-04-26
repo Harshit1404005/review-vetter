@@ -2,7 +2,7 @@
 
 **ReviewVetter** is a high-performance, AI-driven intelligence platform designed for e-commerce owners, marketers, and product managers. It transforms raw, fragmented customer reviews from **Amazon, Shopify, Walmart, and Trustpilot** into actionable strategic assets.
 
-Built for the "Growth Era," ReviewVetter uses **Gemini 1.5 Flash** to provide deep psychological insights and ROI-based math that standard analytics tools miss, all while running on a highly cost-efficient Edge infrastructure.
+Built for the "Growth Era," ReviewVetter uses **Gemini 3.1 Flash-Lite** to provide deep psychological insights and ROI-based math that standard analytics tools miss with extreme cost-efficiency. Our **Global Localization Engine** automatically adapts pricing and revenue analysis to the user's local currency.
 
 ---
 
@@ -40,7 +40,8 @@ Built for the "Growth Era," ReviewVetter uses **Gemini 1.5 Flash** to provide de
 ## 🛠️ Tech Stack
 
 - **Framework**: Next.js 16 (App Router / Turbopack)
-- **AI Brain**: Google Gemini 1.5 Flash
+- **AI Brain**: Google Gemini 3.1 Flash-Lite (Optimized for speed/cost)
+- **Localization**: Intelligent Geo-Currency Engine (₹ INR, $ USD, ر.س SAR, ₽ RUB)
 - **Infrastructure**: Cloudflare Pages (Edge Runtime)
 - **Deployment Adapter**: OpenNext for Cloudflare
 - **Database & Auth**: Supabase

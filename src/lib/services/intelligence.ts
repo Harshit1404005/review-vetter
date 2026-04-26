@@ -93,7 +93,7 @@ export class IntelligenceService {
   /**
    * Analyzes an array of reviews to generate a SWOT intelligence report using Gemini 1.5 Flash.
    */
-  static async analyzeReviews(productName: string, reviews: Review[], url?: string): Promise<ProductIntelligence> {
+  static async analyzeReviews(productName: string, reviews: Review[], url?: string, currencySymbol: string = "$"): Promise<ProductIntelligence> {
     if (reviews.length === 0) {
       throw new Error("No reviews provided for analysis.");
     }
@@ -110,7 +110,7 @@ export class IntelligenceService {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
 
     // 1 ── Calculate Ground Truth Stats to anchor the AI
     const totalReviews = reviews.length;
@@ -125,6 +125,8 @@ export class IntelligenceService {
 
     const prompt = `
       Analyze the following product reviews for "${productName}" and generate a comprehensive intelligence report in JSON format.
+      
+      CURRENCY CONTEXT: Perform all financial recovery calculations and roadmap estimates using the currency symbol: ${currencySymbol}.
       
       GROUND TRUTH DATA (MUST USE TO CALCULATE SCORES):
       - Total Reviews Analyzed: ${totalReviews}
@@ -188,9 +190,9 @@ export class IntelligenceService {
       const text = response.text();
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error("Failed to parse AI response — model returned non-JSON output.");
-      
+
       const aiData = JSON.parse(jsonMatch[0]);
-      
+
       const finalReport = {
         ...aiData,
         sourceMix: reviews.reduce((acc, r) => {
@@ -318,14 +320,14 @@ export class IntelligenceService {
     // 1 ── Aggregate Sentiment
     const avgRating = reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length;
     let sentimentScore = 0;
-    
+
     // 2 ── Extraction & Keyword Analysis
     const wordFreq: Record<string, number> = {};
     const commonWords = new Set(["product", "ordered", "bought", "amazon", "really", "everything"]);
 
     reviews.forEach(r => {
       const text = `${r.title} ${r.body}`.toLowerCase();
-      
+
       // Intent/Sentiment Detection (Logic from RedditService ported)
       if (text.match(/love|amazing|best|quality|perfect/)) sentimentScore++;
       if (text.match(/broken|waste|return|terrible|scam/)) sentimentScore--;
@@ -350,7 +352,7 @@ export class IntelligenceService {
       opportunities: ["Aggressive expansion into EU markets", "Social media 'Viral' potential via TikTok influencers"],
       threats: ["Growing competition from white-label brands", "Supply chain volatility in Q4"]
     };
-    
+
     const roadmap = this.generateRoadmap(swot);
 
     return {
@@ -418,7 +420,7 @@ export class IntelligenceService {
    */
   static generateComparison(subject: ProductIntelligence, competitor: ProductIntelligence): ComparisonReport {
     const scoreDiff = subject.score - competitor.score;
-    
+
     return {
       subject,
       competitor,
@@ -428,14 +430,14 @@ export class IntelligenceService {
         keyRisk: scoreDiff > 0 ? "Customer Support overhead" : "Quality consistency",
       },
       battlecards: [
-        { 
-          title: "Pricing Edge", 
+        {
+          title: "Pricing Edge",
           point: subject.details.value > competitor.details.value ? "You are perceived as better value." : "Competitor is winning on price perception.",
           action: "Highlight 'Premium Durability' to justify current price gaps."
         },
-        { 
-          title: "Feature Gap", 
-          point: "Competitor is missing modern 'AI-integration' signals found in your reviews.", 
+        {
+          title: "Feature Gap",
+          point: "Competitor is missing modern 'AI-integration' signals found in your reviews.",
           action: "Launch ad campaign emphasizing 'The Smartest Choice in the Category'."
         }
       ]
@@ -447,11 +449,11 @@ export class IntelligenceService {
    */
   static async fetchRealReviews(url: string, token: string): Promise<Review[]> {
     console.log(`[ReviewVetter] Starting Resilient Scan for: ${url}`);
-    
+
     const actorIds = ["junglee~amazon-reviews-scraper", "compass~amazon-reviews-scraper", "relex~amazon-reviews-scraper"];
     let runData: any = null;
     let successfulActorId = "";
-    
+
     // Retry state
     const MAX_RETRIES = 3;
     const RETRY_DELAY = 5000; // 5 seconds
@@ -466,6 +468,11 @@ export class IntelligenceService {
             body: JSON.stringify({
               productUrls: [{ url }],
               maxReviews: 50,
+              // ENABLE STEALTH & RESIDENTIAL PROXIES
+              proxyConfiguration: { useApifyProxy: true, groups: ["RESIDENTIAL"] },
+              useStealth: true,
+              pageLoadTimeoutSecs: 60,
+              waitforTimeoutSecs: 10
             }),
             headers: { "Content-Type": "application/json" }
           });
@@ -478,13 +485,13 @@ export class IntelligenceService {
             const status = response.status;
             const text = await response.text();
             console.warn(`[Apify] Actor ${actorId} rejected: ${status} - ${text}`);
-            
+
             if (status === 403 || status === 401) {
-               throw new Error("Scraper blocked by Amazon (Forbidden). Fallback to CSV.");
+              throw new Error("Scraper blocked by Amazon (Forbidden). Fallback to CSV.");
             }
             if (status === 429) {
-               console.warn("[Apify] Rate limited. Waiting...");
-               break; // Move to next actor or retry delay
+              console.warn("[Apify] Rate limited. Waiting...");
+              break; // Move to next actor or retry delay
             }
           }
         }
@@ -492,13 +499,16 @@ export class IntelligenceService {
         if (runData) break; // Success!
 
         if (attempt < MAX_RETRIES) {
-          console.log(`[Apify] Retry ${attempt} failed. Waiting ${RETRY_DELAY/1000}s...`);
-          await wait(RETRY_DELAY);
+          // RANDOMIZED JITTER (4-12 seconds)
+          const jitter = Math.floor(Math.random() * 8000) + 4000;
+          console.log(`[Apify] Block detected or Fail. Wait ${jitter / 1000}s then retry...`);
+          await wait(jitter);
         }
       } catch (err: any) {
         if (err.message.includes("blocked") && attempt === MAX_RETRIES) throw err;
         console.error(`[Apify] Attempt ${attempt} exception:`, err);
-        if (attempt < MAX_RETRIES) await wait(RETRY_DELAY);
+        const retryWait = 5000 + (attempt * 2000); // Incremental backoff
+        if (attempt < MAX_RETRIES) await wait(retryWait);
       }
     }
 
@@ -517,7 +527,7 @@ export class IntelligenceService {
     while (!finished && attempts < 20) {
       const statusRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${token}`);
       const statusData = await statusRes.json();
-      
+
       const status = statusData.data.status;
       console.log(`[Apify] Run Status: ${status} (Attempt ${attempts + 1}/20)`);
 
@@ -556,7 +566,7 @@ export class IntelligenceService {
    */
   static async fetchShopifyReviews(url: string, token: string): Promise<Review[]> {
     console.log(`[ReviewVetter] Shopify Live Scan: ${url}`);
-    
+
     // Actor: epctex/shopify-reviews-scraper
     const response = await fetch(`https://api.apify.com/v2/acts/epctex~shopify-reviews-scraper/runs?token=${token}`, {
       method: "POST",
@@ -569,7 +579,7 @@ export class IntelligenceService {
 
     if (!response.ok) throw new Error("Failed to trigger Shopify scraper.");
     const runData = await response.json();
-    
+
     // Poll for results
     let finished = false;
     let attempts = 0;
@@ -577,7 +587,7 @@ export class IntelligenceService {
       const statusRes = await fetch(`https://api.apify.com/v2/actor-runs/${runData.data.id}?token=${token}`);
       const statusData = await statusRes.json();
       const status = statusData.data.status;
-      
+
       if (status === "SUCCEEDED") {
         finished = true;
       } else if (status === "FAILED" || status === "ABORTED" || status === "TIMED-OUT") {
@@ -608,13 +618,15 @@ export class IntelligenceService {
    */
   static async fetchWalmartReviews(url: string, token: string): Promise<Review[]> {
     console.log(`[ReviewVetter] Walmart Live Scan: ${url}`);
-    
+
     // Actor: junglee~walmart-reviews-scraper
     const response = await fetch(`https://api.apify.com/v2/acts/junglee~walmart-reviews-scraper/runs?token=${token}`, {
       method: "POST",
       body: JSON.stringify({
         productUrls: [{ url }],
         maxReviews: 50,
+        proxyConfiguration: { useApifyProxy: true, groups: ["RESIDENTIAL"] },
+        useStealth: true
       }),
       headers: { "Content-Type": "application/json" }
     });
@@ -629,13 +641,15 @@ export class IntelligenceService {
    */
   static async fetchTrustpilotReviews(url: string, token: string): Promise<Review[]> {
     console.log(`[ReviewVetter] Trustpilot Live Scan: ${url}`);
-    
+
     // Actor: apify~trustpilot-scraper
     const response = await fetch(`https://api.apify.com/v2/acts/apify~trustpilot-scraper/runs?token=${token}`, {
       method: "POST",
       body: JSON.stringify({
         startUrls: [{ url }],
         maxReviews: 50,
+        proxyConfiguration: { useApifyProxy: true, groups: ["RESIDENTIAL"] },
+        useStealth: true
       }),
       headers: { "Content-Type": "application/json" }
     });
@@ -702,23 +716,23 @@ export class IntelligenceService {
 
   private static generateRoadmap(swot: any): StrategicStep[] {
     return [
-      { 
-        title: "Quality Stabilization", 
-        description: `Urgent fix for ${swot.weaknesses[0] || 'consistency'} issues reported in recent signals.`, 
-        impact: "HIGH", 
-        effort: "MEDIUM" 
+      {
+        title: "Quality Stabilization",
+        description: `Urgent fix for ${swot.weaknesses[0] || 'consistency'} issues reported in recent signals.`,
+        impact: "HIGH",
+        effort: "MEDIUM"
       },
-      { 
-        title: "Market Advantage", 
-        description: `Scale the ${swot.strengths[0] || 'performance'} lead identified by customers.`, 
-        impact: "HIGH", 
-        effort: "LOW" 
+      {
+        title: "Market Advantage",
+        description: `Scale the ${swot.strengths[0] || 'performance'} lead identified by customers.`,
+        impact: "HIGH",
+        effort: "LOW"
       },
-      { 
-        title: "ROI Expansion", 
-        description: swot.opportunities[0] || "Explore secondary market penetration.", 
-        impact: "MEDIUM", 
-        effort: "HIGH" 
+      {
+        title: "ROI Expansion",
+        description: swot.opportunities[0] || "Explore secondary market penetration.",
+        impact: "MEDIUM",
+        effort: "HIGH"
       }
     ];
   }
@@ -730,7 +744,7 @@ export class IntelligenceService {
   static async saveReport(report: ProductIntelligence, url: string): Promise<string> {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    
+
     if (!user) throw new Error("Authentication required to save reports.");
 
     const { data, error } = await supabase
@@ -784,7 +798,7 @@ export class IntelligenceService {
   static async getUserReports(): Promise<any[]> {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    
+
     if (!user) return [];
 
     const { data, error } = await supabase
@@ -802,7 +816,7 @@ export class IntelligenceService {
    */
   static async getGlobalScoreTrend(url: string, currentScore: number): Promise<number | null> {
     const supabase = createClient();
-    
+
     // Fetch previous scores for this URL
     const { data: previousReports, error } = await supabase
       .from("reports")
@@ -816,7 +830,7 @@ export class IntelligenceService {
     // Calculate average of previous scores (excluding current one if it was just saved)
     // For simplicity, we'll just average the existing ones.
     const avgPrevious = previousReports.reduce((acc, r) => acc + r.score, 0) / previousReports.length;
-    
+
     return Math.round(currentScore - avgPrevious);
   }
 }

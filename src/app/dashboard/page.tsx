@@ -33,6 +33,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase/client";
+import { getCurrency, formatPrice, CurrencyConfig } from "@/lib/utils/currency";
 
 /* ─── Clipboard Hook ─── */
 function useCopy() {
@@ -61,7 +62,8 @@ function DashboardContent() {
   const [toast, setToast] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isPro, setIsPro] = useState(false);
-  const [userRevenue, setUserRevenue] = useState(10000);
+  const [currency, setCurrency] = useState<CurrencyConfig | null>(null);
+  const [userRevenue, setUserRevenue] = useState(currency?.code === 'INR' ? 200000 : 10000);
   const roadmapRef = useRef<HTMLDivElement>(null);
   const { copied, copy } = useCopy();
   const supabase = createClient();
@@ -79,6 +81,10 @@ function DashboardContent() {
     copy(text, key);
     showToast(label || "Copied to clipboard");
   };
+
+  useEffect(() => {
+    setCurrency(getCurrency());
+  }, []);
 
   useEffect(() => {
     async function checkPro() {
@@ -104,7 +110,8 @@ function DashboardContent() {
             url: productUrl,
             competitorUrl,
             isComparison: !!competitorUrl,
-            isDemo: isDemo
+            isDemo: isDemo,
+            currencySymbol: searchParams.get("currencySymbol") || "$"
           }),
           headers: { "Content-Type": "application/json" },
         });
@@ -180,7 +187,7 @@ function DashboardContent() {
 
       if (!response.ok) {
         if (response.status === 402) {
-          throw new Error("Free limit (3/day) reached. Upgrade Pro for more scans.");
+          throw new Error("Daily intelligence limit (3 reports) reached. Upgrade to Pro for unlimited research.");
         }
         throw new Error("CSV Analysis failed. Please try again.");
       }
@@ -207,7 +214,7 @@ function DashboardContent() {
           <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center mb-8", isBlocked ? "bg-indigo-50" : "bg-red-50")}>
             <ShieldCheck className={cn("w-10 h-10", isBlocked ? "text-indigo-600" : "text-red-500")} />
           </div>
-          <h1 className="text-4xl font-display font-black text-slate-900 mb-4">{isBlocked ? "Site Access Blocked" : "Limited Access"}</h1>
+          <h1 className="text-4xl font-display font-black text-slate-900 mb-4">{isBlocked ? "Live Connection Busy" : "Daily Access Reached"}</h1>
           <p className="text-slate-500 font-medium max-w-sm mb-10 leading-relaxed">
             {errorMsg}
           </p>
@@ -693,7 +700,7 @@ function DashboardContent() {
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Revenue Leakage Analysis</h3>
                   </div>
                   <h4 className="text-lg font-black text-slate-900 mb-2">
-                    Potential <span className="text-red-500">${Math.floor(userRevenue * (parseFloat(intel?.revenueImpact?.recoveryEstimate || "0") / 100)).toLocaleString()}</span> Recovery
+                    Potential <span className="text-red-500">{currency ? formatPrice(Math.floor(userRevenue * (parseFloat(intel?.revenueImpact?.recoveryEstimate || "0") / 100)), { ...currency, rate: 1 }) : currency?.symbol}{Math.floor(userRevenue * (parseFloat(intel?.revenueImpact?.recoveryEstimate || "0") / 100)).toLocaleString(currency?.locale || 'en-US')}</span> Recovery
                   </h4>
                   <p className="text-xs text-slate-500 leading-relaxed max-w-md">
                     Primary Leakage: <span className="font-bold text-slate-700">{intel?.revenueImpact?.leakageReason}</span>.
@@ -704,7 +711,7 @@ function DashboardContent() {
                 <div className="min-w-[200px] bg-slate-50 p-4 rounded-xl border border-slate-100">
                   <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Your Monthly Revenue</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">$</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">{currency?.symbol || "$"}</span>
                     <input
                       type="number"
                       value={userRevenue}
@@ -952,11 +959,11 @@ function CompProductCard({ product, isPrimary }: { product: ProductIntelligence;
 function LoadingState() {
   const [msgIdx, setMsgIdx] = useState(0);
   const messages = [
-    "Initializing secure e-commerce proxy...",
-    "Retrieving top 50 customer reviews...",
-    "Normalizing sentiment vectors...",
-    "Synthesizing AI SWOT Intelligence...",
-    "Finalizing Strategic Roadmap...",
+    "Looking for your product...",
+    "Reading what customers say...",
+    "Looking for things to fix...",
+    "Making your growth plan...",
+    "Almost ready!",
   ];
   useEffect(() => {
     const interval = setInterval(() => setMsgIdx(p => (p + 1) % messages.length), 2800);
