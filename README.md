@@ -4,6 +4,9 @@
 
 Built for the "Growth Era," ReviewVetter uses **Gemini 3.1 Flash-Lite** to provide deep psychological insights and ROI-based math that standard analytics tools miss with extreme cost-efficiency. Our **Global Localization Engine** automatically adapts pricing and revenue analysis to the user's local currency.
 
+> [!TIP]
+> For a deep-dive into the AI architecture, scraping engine, and globalization logic, see [SYSTEM_OVERVIEW.md](file:///d:/Anikiyo/reddit_profile_viewer/review_vetter/SYSTEM_OVERVIEW.md).
+
 ---
 
 ## 🚀 Core Functionalities
