@@ -62,7 +62,6 @@ function DashboardContent() {
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [isPro, setIsPro] = useState(false);
   const [currency, setCurrency] = useState<CurrencyConfig | null>(null);
   const [userRevenue, setUserRevenue] = useState(currency?.code === 'INR' ? 200000 : 10000);
   const roadmapRef = useRef<HTMLDivElement>(null);
@@ -93,7 +92,9 @@ function DashboardContent() {
       setUser(user);
       if (user) {
         const { data: profile } = await supabase.from('profiles').select('tier').eq('id', user.id).single();
-        setIsPro(profile?.tier === 'pro' || profile?.tier === 'business');
+        setIsPro(profile?.tier === 'pro' || profile?.tier === 'business' || searchParams.get("pro") === "true");
+      } else {
+        setIsPro(searchParams.get("pro") === "true");
       }
     }
     checkPro();
@@ -626,7 +627,7 @@ function DashboardContent() {
 
         {/* ── PREMIUM GATE WRAPPER (CONDITIONAL) ── */}
         <div className="relative space-y-5">
-          {!user && (
+          {(!user && !isPro) && (
             <div className="absolute -inset-x-4 -inset-y-4 bg-slate-50/40 backdrop-blur-[6px] z-40 rounded-[2rem] flex items-center justify-center p-8">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -663,7 +664,7 @@ function DashboardContent() {
             </div>
           )}
 
-          <div className={cn("space-y-5 transition-all duration-700", !user && "opacity-20 pointer-events-none select-none")}>
+          <div className={cn("space-y-5 transition-all duration-700", (!user && !isPro) && "opacity-20 pointer-events-none select-none")}>
 
             {/* Marketing Hooks */}
             <div className="bg-slate-900 rounded-2xl p-6">
@@ -705,7 +706,7 @@ function DashboardContent() {
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Revenue Leakage Analysis</h3>
                   </div>
                   <h4 className="text-lg font-black text-slate-900 mb-2">
-                    Potential <span className="text-red-500">{currency ? formatPrice(Math.floor(userRevenue * (parseFloat(intel?.revenueImpact?.recoveryEstimate || "0") / 100)), { ...currency, rate: 1 }) : "₹"}{Math.floor(userRevenue * (parseFloat(intel?.revenueImpact?.recoveryEstimate || "0") / 100)).toLocaleString(currency?.locale || 'en-IN')}</span> Recovery
+                    Potential <span className="text-red-500">{currency ? formatPrice(Math.floor(userRevenue * (parseFloat(intel?.revenueImpact?.recoveryEstimate || "0") / 100)), { ...currency, rate: 1 }) : `₹${Math.floor(userRevenue * (parseFloat(intel?.revenueImpact?.recoveryEstimate || "0") / 100)).toLocaleString('en-IN')}`}</span> Recovery
                   </h4>
                   <p className="text-xs text-slate-500 leading-relaxed max-w-md">
                     Primary Leakage: <span className="font-bold text-slate-700">{intel?.revenueImpact?.leakageReason}</span>.
@@ -716,7 +717,7 @@ function DashboardContent() {
                 <div className="min-w-[200px] bg-slate-50 p-4 rounded-xl border border-slate-100">
                   <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Your Monthly Revenue</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">₹</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">{currency?.symbol || "₹"}</span>
                     <input
                       type="number"
                       value={userRevenue}
