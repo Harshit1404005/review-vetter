@@ -58,6 +58,7 @@ function DashboardContent() {
   const [trend, setTrend] = useState<number | null>(null);
   const [isComparing, setIsComparing] = useState(false);
   const [compInput, setCompInput] = useState("");
+  const [isPro, setIsPro] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -162,6 +163,10 @@ function DashboardContent() {
 
   const handleDownloadBrief = () => {
     if (!intel) return;
+    if (!isPro) {
+      showToast("Upgrade to Pro to unlock PDF Strategic Audits");
+      return;
+    }
     try {
       PDFService.generateReport(intel, isPro);
       showToast("Professional PDF Report generated!");

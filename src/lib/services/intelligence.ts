@@ -833,4 +833,58 @@ export class IntelligenceService {
 
     return Math.round(currentScore - avgPrevious);
   }
+
+  /**
+   * 🛡️ QUOTA GATE: Verifies if the user has scans left today.
+   */
+  static async checkQuota(userId: string): Promise<{ allowed: boolean; limit: number; remaining: number }> {
+    const supabase = createClient();
+    
+    // 1. Get User Profile (Tier)
+    const { data: profile } = await supabase.from('profiles').select('tier').eq('id', userId).single();
+    const tier = profile?.tier || 'free';
+    
+    if (tier === 'pro' || tier === 'business') {
+      return { allowed: true, limit: 999, remaining: 999 };
+    }
+
+    // 2. Get Today's Usage
+    const { data: usage } = await supabase.from('user_usage').select('*').eq('user_id', userId).single();
+    
+    const limit = 3; // FREE PLAN LIMIT
+    const today = new Date().toDateString();
+    const lastReset = usage?.last_reset_at ? new Date(usage.last_reset_at).toDateString() : null;
+    
+    let count = usage?.scrapes_today || 0;
+    
+    // Reset if it's a new day
+    if (today !== lastReset) {
+      await supabase.from('user_usage').upsert({ 
+        user_id: userId, 
+        scrapes_today: 0, 
+        last_reset_at: new Date().toISOString() 
+      }, { onConflict: 'user_id' });
+      count = 0;
+    }
+
+    return { 
+      allowed: count < limit, 
+      limit, 
+      remaining: Math.max(0, limit - count) 
+    };
+  }
+
+  /**
+   * 📉 TRACK USAGE: Increments the daily scrape count.
+   */
+  static async trackUsage(userId: string) {
+    const supabase = createClient();
+    const { data: usage } = await supabase.from('user_usage').select('scrapes_today').eq('user_id', userId).single();
+    
+    await supabase.from('user_usage').upsert({ 
+      user_id: userId, 
+      scrapes_today: (usage?.scrapes_today || 0) + 1,
+      last_reset_at: new Date().toISOString()
+    }, { onConflict: 'user_id' });
+  }
 }

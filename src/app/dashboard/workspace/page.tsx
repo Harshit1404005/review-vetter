@@ -86,7 +86,7 @@ export default function WorkspacePage() {
              </Link>
           </div>
         ) : (
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="flex overflow-x-auto md:grid md:grid-cols-3 gap-6 pb-6 md:pb-0 snap-x">
              <AnimatePresence mode="popLayout">
                {filteredReports.map((report, i) => (
                  <motion.div 
@@ -96,7 +96,7 @@ export default function WorkspacePage() {
                    animate={{ opacity: 1, y: 0 }}
                    exit={{ opacity: 0, scale: 0.95 }}
                    transition={{ delay: i * 0.05 }}
-                   className="bg-white rounded-3xl p-8 border border-slate-200 relative group flex flex-col hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-500/5 transition-all"
+                   className="min-w-[85vw] md:min-w-0 bg-white rounded-3xl p-8 border border-slate-200 relative group flex flex-col hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-500/5 transition-all snap-center"
                  >
                     <div className="flex items-start justify-between mb-6">
                        <div className={cn(

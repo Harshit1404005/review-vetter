@@ -22,6 +22,28 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Competitor URL is required for comparison mode" }, { status: 400 });
     }
 
+    // 1 ── QUOTA CHECK: (Only for live sessions, Demo is free)
+    let user: any = null;
+    try {
+      const { createClient } = await import("@/lib/supabase/server");
+      const supabase = await createClient();
+      const userData = await supabase.auth.getUser();
+      user = userData.data.user;
+
+      if (user) {
+        const quota = await IntelligenceService.checkQuota(user.id);
+        const required = isComparison ? 2 : 1;
+        
+        if (!quota.allowed || quota.remaining < required) {
+          return NextResponse.json({ 
+            error: `Insufficient reports remaining (${quota.remaining}). Upgrade to Pro for unlimited research.` 
+          }, { status: 402 });
+        }
+      }
+    } catch (e) {
+      console.warn("Quota check bypassed:", e);
+    }
+
     const analyzeUrl = async (targetUrl: string) => {
       const isAmazon = targetUrl.toLowerCase().includes("amazon.");
       const isWalmart = targetUrl.toLowerCase().includes("walmart.");
@@ -52,7 +74,9 @@ export async function POST(req: Request) {
           }
 
           if (reviews.length > 0) {
-            return await IntelligenceService.analyzeReviews(pName, reviews, targetUrl, currencySymbol);
+            const report = await IntelligenceService.analyzeReviews(pName, reviews, targetUrl, currencySymbol);
+            if (user) await IntelligenceService.trackUsage(user.id);
+            return report;
           }
         } catch (e: any) {
           console.error(`Analysis failed for ${targetUrl}:`, e);
