@@ -119,11 +119,22 @@ export class PDFService {
       doc.rect(20, rowY + 2, (v.v / 100) * 165, 1.5, "F");
     });
 
-    // SWOT Audit
-    let currentY = 145;
+    // SWOT Audit (Moved down)
+    let currentY = 175;
     doc.setTextColor(secondaryColor);
     doc.setFontSize(11);
     doc.text("SWOT AUDIT SUMMARY", 20, currentY);
+
+    // Revenue Leakage (New Section)
+    doc.setFillColor("#fff1f2");
+    doc.roundedRect(20, 138, 170, 20, 2, 2, "F");
+    doc.setTextColor("#be123c");
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.text("REVENUE LEAKAGE AUDIT", 25, 145);
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Estimated ${intel.revenueImpact.recoveryEstimate} recovery through remediation of: ${intel.revenueImpact.leakageReason}`, 25, 151);
 
     const leftCol = 20;
     const rightCol = 110;

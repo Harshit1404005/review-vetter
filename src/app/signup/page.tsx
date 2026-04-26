@@ -112,7 +112,7 @@ export default function SignupPage() {
             <p className="text-indigo-100 text-sm italic font-medium">
                "ReviewVetter saved us weeks of manual review analysis. It's now our secret weapon for product R&D."
             </p>
-            <p className="text-white font-black uppercase text-[10px] tracking-widest mt-4">— D2C Founder, $10M ARR</p>
+            <p className="text-white font-black uppercase text-[10px] tracking-widest mt-4">— D2C Founder, ₹8 Crore ARR</p>
          </div>
       </div>
 

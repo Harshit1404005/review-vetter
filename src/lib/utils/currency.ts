@@ -20,11 +20,13 @@ const CURRENCY_MAP: Record<string, CurrencyConfig> = {
  */
 export function getCurrency(countryCode?: string): CurrencyConfig {
   if (!countryCode) {
-    // Client side fallback: try to guess from browser locale
+    // Client side fallback: try to guess from browser locale or timezone
     const locale = typeof navigator !== "undefined" ? navigator.language : "en-US";
-    if (locale.includes("IN")) return CURRENCY_MAP.IN;
-    if (locale.includes("RU")) return CURRENCY_MAP.RU;
-    if (locale.includes("SA")) return CURRENCY_MAP.SA;
+    const timeZone = typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : "";
+    
+    if (locale.includes("IN") || timeZone === "Asia/Kolkata") return CURRENCY_MAP.IN;
+    if (locale.includes("RU") || timeZone.includes("Moscow")) return CURRENCY_MAP.RU;
+    if (locale.includes("SA") || timeZone.includes("Riyadh")) return CURRENCY_MAP.SA;
     return CURRENCY_MAP.DEFAULT;
   }
   return CURRENCY_MAP[countryCode] || CURRENCY_MAP.DEFAULT;

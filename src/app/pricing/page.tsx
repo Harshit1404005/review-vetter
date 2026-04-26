@@ -6,7 +6,15 @@ import { CheckCircle2, Zap, ArrowLeft, ShieldCheck, Target, BarChart3, Star } fr
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/Navbar";
 
+import { getCurrency, formatPrice, CurrencyConfig } from "@/lib/utils/currency";
+import { useState, useEffect } from "react";
+
 export default function PricingPage() {
+  const [currency, setCurrency] = useState<CurrencyConfig | null>(null);
+
+  useEffect(() => {
+    setCurrency(getCurrency());
+  }, []);
   return (
     <div className="min-h-screen bg-slate-50 selection:bg-indigo-100">
       <Navbar />
@@ -26,7 +34,7 @@ export default function PricingPage() {
               <h3 className="text-xl font-bold mb-2">Starter</h3>
               <p className="text-xs text-slate-400 mb-8">Try free, no card required.</p>
               <div className="flex items-baseline gap-1 mb-8 text-slate-900 font-black">
-                 <span className="text-4xl">$0</span>
+                  <span className="text-4xl">{currency ? formatPrice(0, currency) : "₹0"}</span>
                  <span className="text-xs text-slate-400">/mo</span>
               </div>
               <ul className="space-y-4 mb-10">
@@ -46,7 +54,7 @@ export default function PricingPage() {
               <h3 className="text-xl font-bold mb-2">Pro</h3>
               <p className="text-xs text-slate-400 mb-8">For high-growth stores.</p>
               <div className="flex items-baseline gap-1 mb-8 text-slate-900 font-black">
-                 <span className="text-4xl">$29</span>
+                  <span className="text-4xl">{currency ? formatPrice(27, currency) : "₹2,199"}</span>
                  <span className="text-xs text-slate-400">/mo</span>
               </div>
               <ul className="space-y-4 mb-10">
@@ -67,7 +75,7 @@ export default function PricingPage() {
               <h3 className="text-xl font-bold mb-2">Agency</h3>
               <p className="text-xs text-slate-500 mb-8">For multi-brand managers.</p>
               <div className="flex items-baseline gap-1 mb-8 font-black">
-                 <span className="text-4xl">$79</span>
+                  <span className="text-4xl">{currency ? formatPrice(89, currency) : "₹7,499"}</span>
                  <span className="text-xs text-slate-500">/mo</span>
               </div>
               <ul className="space-y-4 mb-10">
@@ -96,7 +104,7 @@ export default function PricingPage() {
            </div>
            <div className="flex items-center gap-4">
               <div className="text-right">
-                 <div className="text-2xl font-black text-slate-900">$49</div>
+                  <div className="text-2xl font-black text-slate-900">{currency ? formatPrice(49, currency) : "₹3,999"}</div>
                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Fixed Price</div>
               </div>
               <Link href="/signup" className="px-8 py-3 bg-slate-900 text-white rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-indigo-600 transition-all">

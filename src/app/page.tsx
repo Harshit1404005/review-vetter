@@ -41,7 +41,7 @@ export default function LandingPage() {
       if (!url.trim()) return;
       const params = new URLSearchParams({ 
         url,
-        currencySymbol: currency?.symbol || "$" 
+        currencySymbol: currency?.symbol || "₹" 
       });
       if (isCompare && compUrl.trim()) {
          params.append("compare", compUrl.trim());
@@ -231,7 +231,7 @@ export default function LandingPage() {
                      <h3 className="text-xl font-black mb-1">Starter</h3>
                      <p className="text-slate-400 text-xs mb-8 uppercase font-bold tracking-widest">Beta Launch Period</p>
                      <div className="flex items-baseline gap-1 mb-10">
-                        <span className="text-4xl font-black text-slate-900">{currency ? formatPrice(0, currency) : "$0"}</span>
+                        <span className="text-4xl font-black text-slate-900">{currency ? formatPrice(0, currency) : "₹0"}</span>
                         <span className="text-sm font-black text-slate-400">/mo</span>
                      </div>
                      <ul className="space-y-4 mb-12 flex-1">
@@ -251,7 +251,7 @@ export default function LandingPage() {
                      <h3 className="text-xl font-black mb-1">Pro Scout</h3>
                      <p className="text-indigo-300 text-xs mb-8 uppercase font-bold tracking-widest italic">Growth & Scale Tier</p>
                      <div className="flex items-baseline gap-1 mb-10">
-                        <span className="text-5xl font-black text-white">{currency ? formatPrice(27, currency) : "$27"}</span>
+                        <span className="text-5xl font-black text-white">{currency ? formatPrice(27, currency) : "₹2,199"}</span>
                         <span className="text-sm font-black text-slate-400">/mo</span>
                      </div>
                      <ul className="space-y-4 mb-12 flex-1">
@@ -271,7 +271,7 @@ export default function LandingPage() {
                      <h3 className="text-xl font-black mb-1">Business</h3>
                      <p className="text-slate-400 text-xs mb-8 uppercase font-bold tracking-widest">Agencies & Large Volume</p>
                      <div className="flex items-baseline gap-1 mb-10">
-                        <span className="text-4xl font-black text-slate-900">{currency ? formatPrice(89, currency) : "$89"}</span>
+                        <span className="text-4xl font-black text-slate-900">{currency ? formatPrice(89, currency) : "₹7,499"}</span>
                         <span className="text-sm font-black text-slate-400">/mo</span>
                      </div>
                      <ul className="space-y-4 mb-12 flex-1">
@@ -378,7 +378,7 @@ function RoiCalculator({ currency }: { currency: CurrencyConfig | null }) {
                   <div>
                      <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 text-left">Monthly Revenue</label>
                      <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">{currency?.symbol || "$"}</span>
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">{currency?.symbol || "₹"}</span>
                         <input
                            type="number"
                            value={rev}
@@ -407,7 +407,7 @@ function RoiCalculator({ currency }: { currency: CurrencyConfig | null }) {
                      <div>
                         <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 leading-none">Money you're losing</div>
                         <div className="text-6xl font-black text-white tabular-nums tracking-tighter">
-                           {currency?.symbol || "$"}{lost.toLocaleString(currency?.locale || 'en-US', { maximumFractionDigits: 0 })}
+                           {currency?.symbol || "₹"}{lost.toLocaleString(currency?.locale || 'en-IN', { maximumFractionDigits: 0 })}
                         </div>
                      </div>
                      <div className="text-right pb-2">

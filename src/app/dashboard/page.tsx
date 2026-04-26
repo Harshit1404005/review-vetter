@@ -111,7 +111,7 @@ function DashboardContent() {
             competitorUrl,
             isComparison: !!competitorUrl,
             isDemo: isDemo,
-            currencySymbol: searchParams.get("currencySymbol") || "$"
+            currencySymbol: searchParams.get("currencySymbol") || "₹"
           }),
           headers: { "Content-Type": "application/json" },
         });
@@ -700,7 +700,7 @@ function DashboardContent() {
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Revenue Leakage Analysis</h3>
                   </div>
                   <h4 className="text-lg font-black text-slate-900 mb-2">
-                    Potential <span className="text-red-500">{currency ? formatPrice(Math.floor(userRevenue * (parseFloat(intel?.revenueImpact?.recoveryEstimate || "0") / 100)), { ...currency, rate: 1 }) : currency?.symbol}{Math.floor(userRevenue * (parseFloat(intel?.revenueImpact?.recoveryEstimate || "0") / 100)).toLocaleString(currency?.locale || 'en-US')}</span> Recovery
+                    Potential <span className="text-red-500">{currency ? formatPrice(Math.floor(userRevenue * (parseFloat(intel?.revenueImpact?.recoveryEstimate || "0") / 100)), { ...currency, rate: 1 }) : "₹"}{Math.floor(userRevenue * (parseFloat(intel?.revenueImpact?.recoveryEstimate || "0") / 100)).toLocaleString(currency?.locale || 'en-IN')}</span> Recovery
                   </h4>
                   <p className="text-xs text-slate-500 leading-relaxed max-w-md">
                     Primary Leakage: <span className="font-bold text-slate-700">{intel?.revenueImpact?.leakageReason}</span>.
@@ -711,7 +711,7 @@ function DashboardContent() {
                 <div className="min-w-[200px] bg-slate-50 p-4 rounded-xl border border-slate-100">
                   <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Your Monthly Revenue</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">{currency?.symbol || "$"}</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">₹</span>
                     <input
                       type="number"
                       value={userRevenue}
