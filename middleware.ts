@@ -54,7 +54,7 @@ export async function middleware(request: NextRequest) {
 
     // ── ADMIN BYPASS: Skip quota for the site owner ──
     const adminEmail = process.env.ADMIN_EMAIL
-    if ((adminEmail && user.email === adminEmail) || process.env.NODE_ENV === 'development') {
+    if (adminEmail && user.email === adminEmail) {
       return NextResponse.next()
     }
 
