@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "reviewvetter",
+  "name": "review-vetter",
   "compatibility_date": "2024-11-01",
   "compatibility_flags": ["nodejs_compat"],
   "pages_build_output_dir": ".open-next"
