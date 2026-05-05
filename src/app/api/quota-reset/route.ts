@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-export const runtime = "edge";
-
 /**
  * CRON ROUTE: Resets the dailyScrapes counter in the database.
  * Security: Requires 'CRON_SECRET' header.

@@ -627,7 +627,7 @@ function DashboardContent() {
 
         {/* ── PREMIUM GATE WRAPPER (CONDITIONAL) ── */}
         <div className="relative space-y-5">
-          {(!user && !isPro) && (
+        {(!isPro) && (
             <div className="absolute -inset-x-4 -inset-y-4 bg-slate-50/40 backdrop-blur-[6px] z-40 rounded-[2rem] flex items-center justify-center p-8">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -650,21 +650,32 @@ function DashboardContent() {
                   <div className="bg-slate-50 p-2 rounded-lg border border-slate-100 italic">✓ Strategy Roadmap</div>
                 </div>
                 <div className="pt-2">
-                  <Link
-                    href="/signup"
-                    className="inline-flex items-center gap-2 bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-900 transition-all shadow-xl shadow-indigo-600/30 w-full justify-center"
-                  >
-                    <Zap className="w-4 h-4 fill-current" /> Get Full Access — Free
-                  </Link>
-                  <Link href="/login" className="block mt-4 text-xs font-bold text-slate-400 hover:text-indigo-600 transition-colors">
-                    Already have an account? Sign in
-                  </Link>
+                  {!user ? (
+                    <>
+                      <Link
+                        href="/signup"
+                        className="inline-flex items-center gap-2 bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-900 transition-all shadow-xl shadow-indigo-600/30 w-full justify-center"
+                      >
+                        <Zap className="w-4 h-4 fill-current" /> Get Full Access — Free
+                      </Link>
+                      <Link href="/login" className="block mt-4 text-xs font-bold text-slate-400 hover:text-indigo-600 transition-colors">
+                        Already have an account? Sign in
+                      </Link>
+                    </>
+                  ) : (
+                    <Link
+                      href="/pricing"
+                      className="inline-flex items-center gap-2 bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-900 transition-all shadow-xl shadow-indigo-600/30 w-full justify-center"
+                    >
+                      <Zap className="w-4 h-4 fill-current" /> Upgrade to Pro
+                    </Link>
+                  )}
                 </div>
               </motion.div>
             </div>
           )}
 
-          <div className={cn("space-y-5 transition-all duration-700", (!user && !isPro) && "opacity-20 pointer-events-none select-none")}>
+          <div className={cn("space-y-5 transition-all duration-700", (!isPro) && "opacity-20 pointer-events-none select-none")}>
 
             {/* Marketing Hooks */}
             <div className="bg-slate-900 rounded-2xl p-6">
@@ -791,14 +802,24 @@ function DashboardContent() {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Customer Signals ({reviews.length})</h3>
-                  {reviews.length > 1 && (
-                    <button
-                      onClick={() => setShowAllReviews(v => !v)}
-                      className="flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
+                  <div className="flex items-center gap-4">
+                    {reviews.length > 1 && (
+                      <button
+                        onClick={() => setShowAllReviews(v => !v)}
+                        className="flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
+                      >
+                        {showAllReviews ? <><ChevronUp className="w-3.5 h-3.5" /> Show less</> : <><ChevronDown className="w-3.5 h-3.5" /> Show all {reviews.length}</>}
+                      </button>
+                    )}
+                    <a 
+                      href={productUrl || "#"} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="flex items-center gap-1 text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors"
                     >
-                      {showAllReviews ? <><ChevronUp className="w-3.5 h-3.5" /> Show less</> : <><ChevronDown className="w-3.5 h-3.5" /> Show all {reviews.length}</>}
-                    </button>
-                  )}
+                      View on Platform <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
                 </div>
                 <div className="grid md:grid-cols-3 gap-4">
                   <AnimatePresence mode="popLayout">
@@ -822,8 +843,18 @@ function DashboardContent() {
                         <h4 className="font-bold text-xs text-slate-800 mb-1">{review.title}</h4>
                         <p className="text-[11px] text-slate-500 leading-relaxed italic">"{review.body}"</p>
                         <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
-                          <span className="text-[10px] font-bold text-indigo-600">u/{review.author}</span>
-                          <span className="text-[10px] text-slate-400">{review.date}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-bold text-indigo-600">u/{review.author}</span>
+                            <span className="text-[10px] text-slate-400">{review.date}</span>
+                          </div>
+                          <a
+                            href={productUrl || "#"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded transition-colors flex items-center gap-1"
+                          >
+                            <MessageSquare className="w-3 h-3" /> Reply
+                          </a>
                         </div>
                       </motion.div>
                     ))}

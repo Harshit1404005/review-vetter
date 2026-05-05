@@ -29,10 +29,10 @@ export class QuotaManager {
   }
 
   /**
-   * Checks and increments the usage quota for a user.
+   * Consumes a usage quota for a user (Atomic INCR).
    * Resets automatically at 00:00 IST (Indian Standard Time).
    */
-  static async checkAndIncrement(userId: string): Promise<QuotaStatus> {
+  static async consumeQuota(userId: string): Promise<QuotaStatus> {
     const supabase = await createClient();
     const redis = this.getRedis();
 
@@ -98,6 +98,36 @@ export class QuotaManager {
       limit: limit,
       error: data.error
     };
+  }
+
+  /**
+   * Refunds a quota back to the user (Atomic DECR).
+   * Useful when a scrape fails or serves from cache after quota was consumed.
+   */
+  static async refundQuota(userId: string): Promise<void> {
+    const redis = this.getRedis();
+    if (redis) {
+      try {
+        const key = `quota:${userId}:${this.getISTDateCode()}`;
+        const current = await redis.get<number>(key);
+        if (current && current > 0) {
+          await redis.decr(key);
+        }
+      } catch (err) {
+        console.error("[QuotaManager] Redis refund failed:", err);
+      }
+    } else {
+      // Supabase fallback refund (requires a custom RPC or direct update)
+      const supabase = await createClient();
+      try {
+        const { data: usage } = await supabase.from('user_usage').select('scrapes_today').eq('user_id', userId).single();
+        if (usage && usage.scrapes_today > 0) {
+          await supabase.from('user_usage').update({ scrapes_today: usage.scrapes_today - 1 }).eq('user_id', userId);
+        }
+      } catch (err) {
+        console.error("[QuotaManager] Supabase refund failed:", err);
+      }
+    }
   }
 
   /**

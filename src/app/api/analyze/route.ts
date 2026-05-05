@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { IntelligenceService } from "@/lib/services/intelligence";
 
-export const runtime = "edge";
-
 export async function POST(req: Request) {
   try {
     const { url, competitorUrl, isComparison, isDemo, currencySymbol } = await req.json();
@@ -30,13 +28,32 @@ export async function POST(req: Request) {
       const userData = await supabase.auth.getUser();
       user = userData.data.user;
 
+      if (!user && !isDemo) {
+        return NextResponse.json({ 
+          error: "Please create a free account to run live product analyses." 
+        }, { status: 401 });
+      }
+
       if (user) {
-        const quota = await IntelligenceService.checkQuota(user.id);
+        const { QuotaManager } = await import("@/lib/quota");
         const required = isComparison ? 2 : 1;
+        let allowed = true;
+        let remaining = 0;
         
-        if (!quota.allowed || quota.remaining < required) {
+        for (let i = 0; i < required; i++) {
+          const quota = await QuotaManager.consumeQuota(user.id);
+          allowed = quota.allowed;
+          remaining = quota.remaining;
+          if (!quota.allowed) {
+            // Refund partially consumed if needed
+            for(let j=0; j<i; j++) await QuotaManager.refundQuota(user.id);
+            break;
+          }
+        }
+        
+        if (!allowed) {
           return NextResponse.json({ 
-            error: `Insufficient reports remaining (${quota.remaining}). Upgrade to Pro for unlimited research.` 
+            error: `Insufficient reports remaining (${remaining}). Upgrade to Pro for unlimited research.` 
           }, { status: 402 });
         }
       }
@@ -52,7 +69,13 @@ export async function POST(req: Request) {
     
       // 1 ── CRITICAL: Check Cache First BEFORE triggering expensive Apify
       const cached = await IntelligenceService.checkCache(targetUrl);
-      if (cached) return cached;
+      if (cached) {
+        if (user) {
+          const { QuotaManager } = await import("@/lib/quota");
+          await QuotaManager.refundQuota(user.id);
+        }
+        return cached;
+      }
 
       if (token) {
         try {
@@ -75,11 +98,14 @@ export async function POST(req: Request) {
 
           if (reviews.length > 0) {
             const report = await IntelligenceService.analyzeReviews(pName, reviews, targetUrl, currencySymbol);
-            if (user) await IntelligenceService.trackUsage(user.id);
             return report;
           }
         } catch (e: any) {
           console.error(`Analysis failed for ${targetUrl}:`, e);
+          if (user) {
+            const { QuotaManager } = await import("@/lib/quota");
+            await QuotaManager.refundQuota(user.id);
+          }
           const msg = e.message || "";
           if (msg.includes("blocked") || msg.includes("forbidden") || msg.includes("timeout")) {
              throw new Error("Modern security protocols paused our live scout. Use a different link or upload a CSV below for instant analysis.");
